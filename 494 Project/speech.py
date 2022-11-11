@@ -1,5 +1,5 @@
-import audioop
-import posix
+# import audioop
+# import posix
 from sunau import AUDIO_UNKNOWN_SIZE
 import speech_recognition as sr
 import dearpygui.dearpygui as dpg

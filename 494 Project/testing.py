@@ -3,6 +3,7 @@
 # py -m pip install PyAudio
 
 from tkinter import *
+import tkinter as tk
 from sunau import AUDIO_UNKNOWN_SIZE
 import speech_recognition as sr 
 import dearpygui.dearpygui as dpg
@@ -15,12 +16,13 @@ reminder=""
 # Record Audio
 rstr = ""
 newStr = ""
-root= Tk()
 
 def change_label(text, color):
-  label.config(text = text, bg=color)
+  feedbacklabel.config(text = text, bg=color)
+  frame.update()
 
 def edit_helper(reminderToEdit,reminders):
+  change_label("What should I change the time to?", "blue")
   r = sr.Recognizer()
   # with(dpg.window(label='EDIT', pos=(0,150), width = 1440)):
   #   dpg.add_text('What should I change the time to?')
@@ -31,6 +33,7 @@ def edit_helper(reminderToEdit,reminders):
     audio=r.listen(source)
     rstr = r.recognize_google(audio)
     #print("You said: " + rstr)
+    feedbackList.insert(0, 'You said: ' + rstr)
     return rstr
 
 def substring_after(s, delim):
@@ -56,6 +59,7 @@ def speak_callback():
     # to use another API key, use `r.recognize_google(audio, key="GOOGLE_SPEECH_RECOGNITION_API_KEY")`
     # instead of `r.recognize_google(audio)`
     rstr = r.recognize_google(audio)
+    feedbackList.insert(0, 'You said: ' + rstr)
     # reminder = parse(rstr)
     
     if("add reminder" in rstr or 'new reminder' in rstr):
@@ -77,6 +81,7 @@ def speak_callback():
       #listOfReminders.remove(reminderToRemove)
       if(reminderToRemove in reminders):
         reminders.pop(reminderToRemove)
+        feedbackList.insert(0, 'Removed reminder '+reminderToRemove)
     if("edit reminder" in rstr):
       reminderToEdit=substring_after(rstr,'reminder')
       reminderToEdit=reminderToEdit.strip()
@@ -84,7 +89,8 @@ def speak_callback():
         newTime=edit_helper(reminderToEdit,reminders)
         
         print("NEW TIME IS: " + newTime)
-      reminders[reminderToEdit]=newTime
+        feedbackList.insert(0, 'Time changed from '+reminders[reminderToEdit]+' to '+newTime)
+        reminders[reminderToEdit]=newTime
       
 
     # dpg.add_text("Add - Add reminder x at y")
@@ -93,7 +99,6 @@ def speak_callback():
     #dpg.add_text(r.recognize_google(audio))
     # print("You said: " + rstr)
     #------------------------
-    feedbackList.insert(0, 'You said: ' + rstr)
 
     global newStr
     newStr = "ABC"
@@ -126,23 +131,35 @@ def speak_callback():
     print("Could not request results from Google Speech Recognition service; {0}".format(e))
   
   bSpeak["state"] = "active"
+  change_label("", "white")
 
 
-root.geometry("1000x800")
+root = tk.Tk()
+stvar=tk.StringVar()
+stvar.set("one")
+
+canvas=tk.Canvas(root, width=0, height=100, background='white')
+
+frame = Frame(root)
+
+option=tk.OptionMenu(frame, stvar, "one", "two", "three")
+
+# root.geometry("1000x800")
 root.title('Counting Seconds')
-button = Button(root, text='Stop', width=25, command=root.destroy)
-button.grid(row=0,column=0,columnspan=1)
+button = Button(frame, text='Stop', width=25, command=root.destroy)
 # button.pack()
-bSpeak = Button(root, text='Speak', width=25, command=speak_callback, bg="lightblue")
-bSpeak.grid(row=0,column=1,columnspan=1)
+bSpeak = Button(frame, text='Speak', width=25, command=speak_callback, bg="lightblue")
 # bSpeak.pack()
 
 scrollbar = Scrollbar(root)
 # scrollbar.pack( side = LEFT, fill = Y)
 scrollbar2 = Scrollbar(root)
 # scrollbar2.pack( side = RIGHT, fill = Y)
-reminderList = Listbox(root, yscrollcommand = scrollbar.set , width = 100)
-feedbackList = Listbox(root, yscrollcommand = scrollbar2.set , width = 100)
+
+reminderList = Listbox(frame, yscrollcommand = scrollbar.set , width = 100)
+feedbackList = Listbox(frame, yscrollcommand = scrollbar2.set , width = 100)
+rlabel = Label(frame, text="Reminders list", font="10")
+flabel = Label(frame, text="Feedback list", font="10")
 # for line in range(20):
 #    feedbackList.insert(0, 'This is line number       ' + str(line))
 # for line in range(20):
@@ -152,21 +169,33 @@ feedbackList = Listbox(root, yscrollcommand = scrollbar2.set , width = 100)
 # scrollbar.config( command = reminderList.yview )
 # scrollbar2.config( command = feedbackList.yview )
 
-help_label = Label(root, text="""Add - Add reminder x at y
+help_label = Label(frame, text="""*** COMMANDS ***
+Add - Add reminder x at y
 Edit - Edit reminder x. (Say new time)
 Remove - Remove reminder x
 \nEX: 
   \"add reminder HOMEWORK at 6\"
   \"edit reminder HOMEWORK (wait) 8\"
   \"remove reminder HOMEWORK\"""")
+help_label.config(fg="red")
+
+feedbacklabel = Label(frame, text="", borderwidth=1, relief="solid", width=30, height=3, font="bold 25")
+
+canvas.grid(row=0,column=1)
+frame.grid(row=0,column=0, sticky="n")
+button.grid(row=0,column=0,columnspan=1, sticky="nw")
+bSpeak.grid(row=0,column=1,columnspan=1, sticky="n")
 help_label.grid(row=1, column=0, columnspan=2)
-
+rlabel.grid(row=2, column=0, sticky="w")
 reminderList.grid(row=3,column=0,columnspan=3)
-# scrollbar.grid(row=3,column=4,rowspan=1)
-feedbackList.grid(row=5,column=0,columnspan=2)
-# scrollbar2.grid(row=4,column=4,rowspan=1)
+feedbacklabel.grid(row=4, column=0, columnspan=2) # label for what to do
+flabel.grid(row=5, column=0, sticky="w")
+feedbackList.grid(row=6,column=0,columnspan=3)
 
-label = Label(root, text="Test", borderwidth=1, relief="solid", width=30, height=3, font="bold 25")
-# label.grid(row=4, column=0, columnspan=2) # label for what to do
+
+# if __name__== '__main__':
+#   root=tk.Tk()
+#   gui=Gui(root)
+#   root.mainloop()
 
 root.mainloop()
