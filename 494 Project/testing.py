@@ -62,7 +62,7 @@ def speak_callback():
     feedbackList.insert(0, 'You said: ' + rstr)
     # reminder = parse(rstr)
     
-    if("add reminder" in rstr or 'new reminder' in rstr):
+    if("add reminder" in rstr or 'new reminder' in rstr or 'create reminder' in rstr or 'set reminder' in rstr):
       if('at' not in rstr):
         reminderToAdd=substring_after(rstr,'reminder')
         reminderToAdd=reminderToAdd.strip()
@@ -75,14 +75,14 @@ def speak_callback():
         reminderToAdd=reminderToAdd.strip()
         #listOfReminders.append(reminderToAdd)
         reminders[reminderToAdd]= timeToAdd
-    if("remove reminder" in rstr):
+    if("remove reminder" in rstr or 'delete reminder' in rstr or 'cancel reminder' in rstr or 'clear reminder' in rstr):
       reminderToRemove=substring_after(rstr,'reminder')
       reminderToRemove=reminderToRemove.strip()
       #listOfReminders.remove(reminderToRemove)
       if(reminderToRemove in reminders):
         reminders.pop(reminderToRemove)
         feedbackList.insert(0, 'Removed reminder '+reminderToRemove)
-    if("edit reminder" in rstr):
+    if("edit reminder" in rstr or 'change reminder' in rstr or 'update reminder' in rstr):
       reminderToEdit=substring_after(rstr,'reminder')
       reminderToEdit=reminderToEdit.strip()
       if(reminderToEdit in reminders):
